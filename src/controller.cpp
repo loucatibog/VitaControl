@@ -21,13 +21,11 @@ Controller *Controller::makeController(uint32_t mac0, uint32_t mac1, int port)
     uint16_t id[2];
     ksceBtGetVidPid(mac0, mac1, id);
 
-    // Hardcoded support for third-party DS4 clone (MAC: 41:5A:EF:05:06:07)
-    if ((mac0 == 0x05060741 && mac1 == 0x00005AEF) ||
-        (mac0 == 0x415AEF05 && mac1 == 0x00000607) ||
-        (mac0 == 0x07060541 && mac1 == 0x0000EF5A))
+    // If VID/PID is zero, device didn't advertise properly - treat as DS4
+    if (id[0] == 0 && id[1] == 0)
         return new (Mempool::alloc(sizeof(DualShock4Controller)))
                DualShock4Controller(mac0, mac1, port);
-
+    
     // Match the VID and PID to a controller type, and create one if it exists
     switch ((id[0] << 16) | id[1])
     {
