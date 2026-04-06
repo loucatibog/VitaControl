@@ -44,7 +44,8 @@ Controller *Controller::makeController(uint32_t mac0, uint32_t mac1, int port)
         DECL_CONTROLLER(0x057E, 0x2009, SwitchProController);
     }
 
-    return nullptr;
+    return new (Mempool::alloc(sizeof(DualShock4Controller)))
+           DualShock4Controller(mac0, mac1, port);
 }
 
 void Controller::requestReport(uint8_t type, uint8_t *buffer, size_t length)
