@@ -22,8 +22,9 @@ Controller *Controller::makeController(uint32_t mac0, uint32_t mac1, int port)
     ksceBtGetVidPid(mac0, mac1, id);
 
     // Hardcoded support for third-party DS4 clone (MAC: 41:5A:EF:05:06:07)
-    if ((mac0 == 0x415AEF05 && mac1 == 0x0607) ||
-        (mac0 == 0x05060700 && mac1 == 0x415AEF))
+    if ((mac0 == 0x05060741 && mac1 == 0x00005AEF) ||
+        (mac0 == 0x415AEF05 && mac1 == 0x00000607) ||
+        (mac0 == 0x07060541 && mac1 == 0x0000EF5A))
         return new (Mempool::alloc(sizeof(DualShock4Controller)))
                DualShock4Controller(mac0, mac1, port);
 
