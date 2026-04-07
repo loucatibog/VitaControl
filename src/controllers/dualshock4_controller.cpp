@@ -31,9 +31,6 @@ DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int por
     buffer[77] = crc >> 16;
     buffer[78] = crc >> 24;
 
-    // Send the write request, omitting the 0xA2 byte
-    requestReport(HID_REQUEST_WRITE, buffer + 1, sizeof(buffer) - 1);
-
     // Set the touchpad dimensions
     touchData.touchWidth  = 1920;
     touchData.touchHeight =  940;
@@ -43,10 +40,14 @@ DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int por
 
 void DualShock4Controller::processReport(uint8_t *buffer, size_t length)
 {
-    // Only process the report if it's of the right type
-    if (buffer[0] != 0x11)
+    // Support both 0x11 (standard DS4) and 0x01 (clone/generic HID) reports
+    uint8_t *reportBuffer;
+    if (buffer[0] == 0x11)
+        reportBuffer = buffer;
+    else if (buffer[0] == 0x01)
+        reportBuffer = buffer - 1;
+    else
         return;
-
     // Interpret the data as an input report
     DualShock4Report0x11 *report = (DualShock4Report0x11*)buffer;
 
