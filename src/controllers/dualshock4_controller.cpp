@@ -41,14 +41,10 @@ DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int por
 void DualShock4Controller::processReport(uint8_t *buffer, size_t length)
 {
     // Support both 0x11 (standard DS4) and 0x01 (clone/generic HID) reports
-    uint8_t *reportBuffer;
-    if (buffer[0] == 0x11)
-        reportBuffer = buffer;
-    else if (buffer[0] == 0x01)
-        reportBuffer = buffer - 1;
-    else
+    if (buffer[0] != 0x11 && buffer[0] != 0x01)
         return;
-    // Interpret the data as an input report
+
+        // Interpret the data as an input report
     DualShock4Report0x11 *report = (DualShock4Report0x11*)buffer;
 
     // Clear the old control data
