@@ -12,24 +12,18 @@ DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int por
         { 0x20, 0x00, 0x20 }, // Pink
     };
 
-    // Prepare a write request to switch to extended mode and set LED colours
-    static uint8_t buffer[79] = {};
-    buffer[0]  = 0xA2;
-    buffer[1]  = 0x11;
-    buffer[2]  = 0xC0;
-    buffer[3]  = 0x20;
-    buffer[4]  = 0xF3;
-    buffer[5]  = 0x04;
-    buffer[9]  = ledColours[port][0];
-    buffer[10] = ledColours[port][1];
-    buffer[11] = ledColours[port][2];
+    // Send simplified init without CRC for clone compatibility
+    static uint8_t buffer[78] = {};
+    buffer[0]  = 0x11;
+    buffer[1]  = 0xC0;
+    buffer[2]  = 0x20;
+    buffer[3]  = 0xF3;
+    buffer[4]  = 0x04;
+    buffer[8]  = ledColours[port][0];
+    buffer[9]  = ledColours[port][1];
+    buffer[10] = ledColours[port][2];
 
-    // Calculate the CRC of the data (including the 0xA2 byte) and append it to the end
-    uint32_t crc = calculateCrc(buffer, 75);
-    buffer[75] = crc >>  0;
-    buffer[76] = crc >>  8;
-    buffer[77] = crc >> 16;
-    buffer[78] = crc >> 24;
+    requestReport(HID_REQUEST_WRITE, buffer, sizeof(buffer));
 
     // Set the touchpad dimensions
     touchData.touchWidth  = 1920;
@@ -40,8 +34,8 @@ DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int por
 
 void DualShock4Controller::processReport(uint8_t *buffer, size_t length)
 {
-    // Support both 0x11 (standard DS4) and 0x01 (clone/generic HID) reports
-    if (buffer[0] != 0x11 && buffer[0] != 0x01)
+    // Accept any report ID for clone compatibility
+    if (length == 0)
         return;
 
         // Interpret the data as an input report
