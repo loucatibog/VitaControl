@@ -4,26 +4,11 @@
 
 DualShock4Controller::DualShock4Controller(uint32_t mac0, uint32_t mac1, int port): Controller(mac0, mac1, port)
 {
-    static const uint8_t ledColours[][3] =
-    {
-        { 0x00, 0x00, 0x40 }, // Blue
-        { 0x40, 0x00, 0x00 }, // Red
-        { 0x00, 0x40, 0x00 }, // Green
-        { 0x20, 0x00, 0x20 }, // Pink
-    };
 
-    // Send simplified init without CRC for clone compatibility
-    static uint8_t buffer[78] = {};
-    buffer[0]  = 0x11;
-    buffer[1]  = 0xC0;
-    buffer[2]  = 0x20;
-    buffer[3]  = 0xF3;
-    buffer[4]  = 0x04;
-    buffer[8]  = ledColours[port][0];
-    buffer[9]  = ledColours[port][1];
-    buffer[10] = ledColours[port][2];
-
-    requestReport(HID_REQUEST_WRITE, buffer, sizeof(buffer));
+    // Request feature report first to wake up clone controllers
+    static uint8_t featureBuffer[64] = {};
+    featureBuffer[0] = 0x02;
+    requestReport(HID_REQUEST_FEATURE, featureBuffer, sizeof(featureBuffer));
 
     // Set the touchpad dimensions
     touchData.touchWidth  = 1920;
